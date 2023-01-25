@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import cors from "cors";
 
 import connectDB from "./db/connectDB.js";
 import productRoute from "./router/productRoute.js";
@@ -16,6 +17,7 @@ dotenv.config();
 // Parsing body
 app.use(express.json());
 
+app.use(cors());
 // Routes
 
 app.use("/api/v1/product", productRoute);
