@@ -5,17 +5,17 @@ async function login(req, res) {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(404).json("Please fill all details");
+      return res.status(404).json({ err: "Please fill all details" });
     }
     const user = await User.findOne({ email });
     if (!user) {
       return res
         .status(500)
-        .json({ msg: "You are not registered. Please Sign Up first" });
+        .json({ err: "You are not registered. Please Sign Up first" });
     }
     const isPasswordCorrect = await user.comparePassword(password);
     if (!isPasswordCorrect) {
-      return res.status(500).json({ msg: "Email or password incorrect" });
+      return res.status(500).json({ err: "Email or password incorrect" });
     }
     const token = user.createJWT();
     user.password = undefined;
@@ -30,13 +30,13 @@ async function signup(req, res) {
   try {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
-      return res.status(500).json({ msg: "Please fill all details" });
+      return res.status(500).json({ err: "Please fill all details" });
     }
     const isEmailPresent = await User.findOne({ email });
     if (isEmailPresent) {
       return res
         .status(200)
-        .json({ msg: "You are already registered. Please log in" });
+        .json({ err: "You are already registered. Please log in" });
     }
     const user = await User.create({ name, email, password });
     const token = user.createJWT();
@@ -79,7 +79,7 @@ async function updateUser(req, res) {
     let { name, email, password, id } = req.body;
     const data = await User.findById(id);
     if (!data) {
-      return res.status(500).json({ msg: "Email not present" });
+      return res.status(500).json({ err: "Email not present" });
     }
     const bodyToUpdate = { name, email };
     if (password.length != 0) {
