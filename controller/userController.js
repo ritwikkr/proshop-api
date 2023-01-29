@@ -32,7 +32,7 @@ async function signup(req, res) {
     }
     const isEmailPresent = await User.findOne({ email });
     if (isEmailPresent) {
-      throw new Error({ msg: "You are already registered. Please log in" });
+      throw new Error(`You are already registered. Please log in`);
     }
     const user = await User.create({ name, email, password });
     const token = user.createJWT();
