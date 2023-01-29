@@ -5,17 +5,15 @@ async function login(req, res) {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(404).json({ err: "Please fill all details" });
+      throw new Error({ msg: "Please fill all details" });
     }
     const user = await User.findOne({ email });
     if (!user) {
-      return res
-        .status(500)
-        .json({ err: "You are not registered. Please Sign Up first" });
+      throw new Error({ msg: "You are not registered. Please Sign Up first" });
     }
     const isPasswordCorrect = await user.comparePassword(password);
     if (!isPasswordCorrect) {
-      return res.status(500).json({ err: "Email or password incorrect" });
+      throw new Error({ msg: "Email or password incorrect" });
     }
     const token = user.createJWT();
     user.password = undefined;
@@ -30,13 +28,11 @@ async function signup(req, res) {
   try {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
-      return res.status(500).json({ err: "Please fill all details" });
+      throw new Error({ msg: "Please fill all details" });
     }
     const isEmailPresent = await User.findOne({ email });
     if (isEmailPresent) {
-      return res
-        .status(200)
-        .json({ err: "You are already registered. Please log in" });
+      throw new Error({ msg: "You are already registered. Please log in" });
     }
     const user = await User.create({ name, email, password });
     const token = user.createJWT();
@@ -53,9 +49,8 @@ async function addAddress(req, res) {
     const { useraddress, userId } = req.body;
     const isUserPresent = await User.findById(userId);
     if (!isUserPresent) {
-      return;
+      throw new Error({ msg: "Email not present" });
     }
-    console.log(useraddress);
     const data = await User.findByIdAndUpdate(
       userId,
       {
@@ -79,7 +74,7 @@ async function updateUser(req, res) {
     let { name, email, password, id } = req.body;
     const data = await User.findById(id);
     if (!data) {
-      return res.status(500).json({ err: "Email not present" });
+      throw new Error({ mag: "Email not present" });
     }
     const bodyToUpdate = { name, email };
     if (password.length != 0) {
