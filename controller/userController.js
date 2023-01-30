@@ -5,15 +5,17 @@ async function login(req, res) {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      throw new Error("Please fill all details");
+      return res.status(500).json({ error: "Please fill all details" });
     }
     const user = await User.findOne({ email });
     if (!user) {
-      throw new Error("You are not registered. Please Sign Up first");
+      return res
+        .status(500)
+        .json({ error: "User not registered!. Please register first" });
     }
     const isPasswordCorrect = await user.comparePassword(password);
     if (!isPasswordCorrect) {
-      throw new Error("Email or password incorrect");
+      return res.status(500).json({ error: "Email or Password incorrect" });
     }
     const token = user.createJWT();
     user.password = undefined;
@@ -26,13 +28,19 @@ async function login(req, res) {
 
 async function signup(req, res) {
   try {
-    const { name, email, password } = req.body;
+    console.log(req.body);
+    const { name, email, password, confirmPassword } = req.body;
     if (!name || !email || !password) {
-      throw new Error({ msg: "Please fill all details" });
+      return res.status(500).json({ error: "Please fill all details" });
+    }
+    if (password !== confirmPassword) {
+      return res.status(500).json({ error: "Passwords do not match" });
     }
     const isEmailPresent = await User.findOne({ email });
     if (isEmailPresent) {
-      throw new Error(`You are already registered. Please log in`);
+      return res
+        .status(500)
+        .json({ error: "You are already registered. Please log in" });
     }
     const user = await User.create({ name, email, password });
     const token = user.createJWT();
@@ -49,7 +57,7 @@ async function addAddress(req, res) {
     const { useraddress, userId } = req.body;
     const isUserPresent = await User.findById(userId);
     if (!isUserPresent) {
-      throw new Error({ msg: "Email not present" });
+      return res.status(500).json({ error: "Email not present" });
     }
     const data = await User.findByIdAndUpdate(
       userId,
@@ -74,7 +82,7 @@ async function updateUser(req, res) {
     let { name, email, password, id } = req.body;
     const data = await User.findById(id);
     if (!data) {
-      throw new Error({ mag: "Email not present" });
+      return res.status(500).json({ error: "Email not present" });
     }
     const bodyToUpdate = { name, email };
     if (password.length != 0) {
@@ -94,3 +102,4 @@ async function updateUser(req, res) {
 }
 
 export { login, signup, addAddress, updateUser };
+
