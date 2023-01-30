@@ -5,15 +5,15 @@ async function login(req, res) {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      throw new Error({ msg: "Please fill all details" });
+      throw new Error("Please fill all details");
     }
     const user = await User.findOne({ email });
     if (!user) {
-      throw new Error({ msg: "You are not registered. Please Sign Up first" });
+      throw new Error("You are not registered. Please Sign Up first");
     }
     const isPasswordCorrect = await user.comparePassword(password);
     if (!isPasswordCorrect) {
-      throw new Error({ msg: "Email or password incorrect" });
+      throw new Error("Email or password incorrect");
     }
     const token = user.createJWT();
     user.password = undefined;
