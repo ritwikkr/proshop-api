@@ -1,13 +1,23 @@
 import mongoose from "mongoose";
 
-const orderSchema = new mongoose.Schema({
-  isPaid: Boolean,
-  amount: Number,
-  razorpay: {
-    orderId: String,
-    paymentId: String,
-    signature: String,
+const orderSchema = new mongoose.Schema(
+  {
+    products: [
+      {
+        productId: {
+          type: mongoose.Types.ObjectId,
+          required: true,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+    amount: { type: Number, required: true },
+    userId: { type: mongoose.Types.ObjectId, ref: "User" },
   },
-});
+  { timestamps: true }
+);
 
 export default mongoose.model("Order", orderSchema);

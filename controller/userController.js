@@ -1,5 +1,6 @@
 import User from "../model/userSchema.js";
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
 
 async function login(req, res) {
   try {
@@ -95,13 +96,11 @@ async function updateUser(req, res) {
 
 async function updatePassword(req, res) {
   try {
-    // console.log(req.body);
     const { passwordDetails, id } = req.body;
     const isUserPresent = await User.findById(id);
     const isPasswordCorrect = await isUserPresent.comparePassword(
       passwordDetails.currPassword
     );
-    console.log(isPasswordCorrect);
     if (!isPasswordCorrect) {
       return res.status(500).json({ message: "Old Password Incorrect" });
     }
@@ -121,7 +120,7 @@ async function updatePassword(req, res) {
     const token = await user.createJWT();
     return res.status(200).json({ user, token });
   } catch (error) {
-    console.log(error);
+    res.status(500).json(error);
   }
 }
 

@@ -12,12 +12,10 @@ async function getProducts(req, res) {
 async function getSingleProduct(req, res) {
   try {
     const id = req.params.id;
-    console.log(id);
     const data = await Product.findById(id);
-    console.log(data);
     res.status(200).json(data);
   } catch (error) {
-    console.log(error);
+    res.status(500).json(error);
   }
 }
 

@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema(
         country: { type: String },
       },
     ],
+    orders: [
+      {
+        productId: { type: mongoose.Types.ObjectId },
+      },
+    ],
   },
   { timestamps: true }
 );
