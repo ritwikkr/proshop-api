@@ -2,8 +2,20 @@ import Product from "../model/productSchema.js";
 
 async function getProducts(req, res) {
   try {
-    const product = await Product.find();
-    res.json(product);
+    const page = Number(req.query.page) || 1;
+    const pageSize = Number(req.query.pageSize) || 10;
+
+    const skip = (page - 1) * pageSize;
+
+    const products = await Product.find().skip(skip).limit(pageSize);
+    const totalCount = await Product.countDocuments();
+
+    res.json({
+      products,
+      page,
+      pageSize,
+      totalCount,
+    });
   } catch (error) {
     res.status(401).json(error);
   }
@@ -19,4 +31,13 @@ async function getSingleProduct(req, res) {
   }
 }
 
-export { getProducts, getSingleProduct };
+async function addProduct(req, res) {
+  try {
+    const data = await Product.create(req.body);
+    res.status(201).json(data);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export { getProducts, getSingleProduct, addProduct };
