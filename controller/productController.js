@@ -40,4 +40,14 @@ async function addProduct(req, res) {
   }
 }
 
-export { getProducts, getSingleProduct, addProduct };
+// GET: Featured Product
+async function getFeaturedProduct(req, res) {
+  try {
+    const data = await Product.find({ featured: true });
+    res.status(200).json(data);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export { getProducts, getSingleProduct, addProduct, getFeaturedProduct };
