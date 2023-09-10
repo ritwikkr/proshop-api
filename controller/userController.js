@@ -63,7 +63,9 @@ async function addAddress(req, res) {
       userId,
       {
         address: {
-          house: useraddress.address,
+          name: useraddress.name,
+          phoneNumber: useraddress.phoneNumber,
+          address: useraddress.address,
           city: useraddress.city,
           postal: useraddress.postal_code,
           country: useraddress.country,

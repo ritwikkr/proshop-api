@@ -9,15 +9,12 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     address: [
       {
-        house: { type: String },
+        name: { type: String },
+        phoneNumber: { type: String },
+        address: { type: String },
         city: { type: String },
         postal: { type: Number },
         country: { type: String },
-      },
-    ],
-    orders: [
-      {
-        productId: { type: mongoose.Types.ObjectId },
       },
     ],
   },
