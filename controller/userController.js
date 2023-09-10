@@ -67,6 +67,7 @@ async function addAddress(req, res) {
           phoneNumber: useraddress.phoneNumber,
           address: useraddress.address,
           city: useraddress.city,
+          state: useraddress.state,
           postal: useraddress.postal_code,
           country: useraddress.country,
         },

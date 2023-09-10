@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
         phoneNumber: { type: String },
         address: { type: String },
         city: { type: String },
+        state: { type: String },
         postal: { type: Number },
         country: { type: String },
       },
