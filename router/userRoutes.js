@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.route("/login").post(login);
 router.route("/signup").post(signup);
-router.route("/addAddress").put(addAddress);
+router.route("/addAddress").patch(addAddress);
 router.route("/update").put(updateUser);
 router.route("/updatePassword").put(updatePassword);
 router.route("/forgotPassword").post(forgotPassword);

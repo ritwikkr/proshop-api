@@ -54,22 +54,25 @@ async function signup(req, res) {
 
 async function addAddress(req, res) {
   try {
-    const { useraddress, userId } = req.body;
+    const { userAddress, userId } = req.body;
     const isUserPresent = await User.findById(userId);
     if (!isUserPresent) {
       return res.status(500).json({ error: "Email not present" });
     }
+
     const user = await User.findByIdAndUpdate(
       userId,
       {
-        address: {
-          name: useraddress.name,
-          phoneNumber: useraddress.phoneNumber,
-          address: useraddress.address,
-          city: useraddress.city,
-          state: useraddress.state,
-          postal: useraddress.postal_code,
-          country: useraddress.country,
+        $push: {
+          address: {
+            name: userAddress.name,
+            phoneNumber: userAddress.phoneNumber,
+            address: userAddress.address,
+            city: userAddress.city,
+            state: userAddress.state,
+            postal: userAddress.postal_code,
+            country: userAddress.country,
+          },
         },
       },
       { new: true }
