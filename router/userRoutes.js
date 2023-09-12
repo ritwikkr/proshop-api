@@ -1,6 +1,7 @@
 import express from "express";
 import {
   addAddress,
+  deleteAddress,
   forgotPassword,
   login,
   signup,
@@ -12,6 +13,7 @@ const router = express.Router();
 router.route("/login").post(login);
 router.route("/signup").post(signup);
 router.route("/addAddress").patch(addAddress);
+router.route("/deleteAddress").delete(deleteAddress);
 router.route("/update").put(updateUser);
 router.route("/updatePassword").put(updatePassword);
 router.route("/forgotPassword").post(forgotPassword);

@@ -148,6 +148,35 @@ async function forgotPassword(req, res) {
   }
 }
 
+async function deleteAddress(req, res) {
+  try {
+    const { userId, addressId } = req.query;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).json("User not present");
+    }
+
+    // Find the index of the address in the user's address array
+    const addressIndex = user.address.findIndex(
+      (address) => address._id.toString() === addressId
+    );
+
+    if (addressIndex === -1) {
+      return res.status(400).json("Address not found");
+    }
+
+    // Remove the address from the address array
+    user.address.splice(addressIndex, 1);
+
+    // Save the updated user
+    await user.save();
+
+    return res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export {
   login,
   signup,
@@ -155,4 +184,5 @@ export {
   updateUser,
   updatePassword,
   forgotPassword,
+  deleteAddress,
 };
