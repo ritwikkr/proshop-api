@@ -57,12 +57,13 @@ app.post("/api/v1/payment/razor", async (req, res) => {
     const options = {
       amount: req.body.totalAmt * 100, // Amount in paise (e.g., 5000 paise = ₹50)
       currency: "INR", // Currency code (INR for Indian Rupees)
-      receipt: Math.random(), // You can generate a receipt ID here
+      receipt: Math.random().toString(), // You can generate a receipt ID here
     };
 
     const response = await razorpay.orders.create(options);
     res.json(response);
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ error: "Something went wrong" });
   }
 });
