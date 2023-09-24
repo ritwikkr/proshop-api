@@ -55,7 +55,7 @@ app.post("/api/v1/payment", async (req, res) => {
 app.post("/api/v1/payment/razor", async (req, res) => {
   try {
     const options = {
-      amount: req.body.totalAmt * 100, // Amount in paise (e.g., 5000 paise = ₹50)
+      amount: req.body.totalPrice * 100, // Amount in paise (e.g., 5000 paise = ₹50)
       currency: "INR", // Currency code (INR for Indian Rupees)
       receipt: Math.random().toString(), // You can generate a receipt ID here
     };
