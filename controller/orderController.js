@@ -2,7 +2,6 @@ import Order from "../model/orderSchema.js";
 
 async function createOrder(req, res) {
   try {
-    console.log(req.body);
     const { orderDetails, userId, totalPrice } = req.body;
     const products = orderDetails.map((item) => {
       return { productId: item._id, price: item.price };
