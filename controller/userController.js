@@ -141,8 +141,15 @@ async function forgotPassword(req, res) {
     }
     const token = await isUserPresent.createJWT();
 
-    const resetLink = `https://localhost:3000/reset-password?token=${token}`;
-    sendPasswordResetEmail(isUserPresent.email, resetLink);
+    const resetLink = `https://myproshop.netlify.app/reset-password?token=${token}`;
+    const emailSent = await sendPasswordResetEmail(
+      isUserPresent.email,
+      resetLink
+    );
+    if (!emailSent) {
+      return res.status(400).json("Error");
+    }
+    res.status(200).json("Email Sent Successfully");
   } catch (error) {
     console.log(error);
   }
@@ -177,6 +184,32 @@ async function deleteAddress(req, res) {
   }
 }
 
+async function resetPassword(req, res) {
+  try {
+    const { password } = req.body;
+    const user = await User.findById(req.user);
+    if (!user) {
+      return res.status(400).json("User not found");
+    }
+
+    // Update the password
+    user.password = password.newPassword;
+    await user.save();
+
+    res.status(200).json("Password reset successfully");
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function checkJWTExpiry(req, res) {
+  try {
+    res.status(200).json(true);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export {
   login,
   signup,
@@ -185,4 +218,6 @@ export {
   updatePassword,
   forgotPassword,
   deleteAddress,
+  resetPassword,
+  checkJWTExpiry,
 };
