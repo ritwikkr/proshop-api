@@ -1,8 +1,12 @@
 import AWS from "aws-sdk";
+import dotenv from "dotenv";
+
+// Embedding .env file
+dotenv.config();
 
 const SES_CONFIG = {
-  accessKeyId: "AKIAR3K5X7FIBYQ5MA6L",
-  secretAccessKey: "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",
+  accessKeyId: process.env.AWS_CLIENT_KEY,
+  secretAccessKey: process.env.AWS_SECRET_KEY,
   region: "ap-south-1",
 };
 
