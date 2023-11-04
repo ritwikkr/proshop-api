@@ -31,4 +31,18 @@ async function deleteAllOrder(req, res) {
   }
 }
 
-export { createOrder, getOrder, deleteAllOrder };
+// GET: Order ID for Order Details page
+async function getOrderByOrderId(req, res) {
+  try {
+    const { orderId } = req.params;
+    // console.log(orderId);
+    // return;
+    const data = await Order.findById(orderId).populate("items");
+    console.log(data);
+    res.status(200).json(data);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export { createOrder, getOrder, deleteAllOrder, getOrderByOrderId };
