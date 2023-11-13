@@ -2,11 +2,26 @@ import Order from "../model/orderSchema.js";
 
 async function createOrder(req, res) {
   try {
-    const { orderDetails, userId, totalPrice } = req.body;
+    const { orderDetails, userId, totalPrice, deliveryAddress } = req.body;
     const products = orderDetails.map((item) => {
       return { productId: item._id, price: item.price };
     });
-    const data = await Order.create({ products, userId, amount: totalPrice });
+    console.log("Delivery Address", deliveryAddress);
+    const shippingAddress = {
+      name: deliveryAddress?.name,
+      phoneNumber: deliveryAddress?.phoneNumber,
+      address: deliveryAddress?.address,
+      city: deliveryAddress?.city,
+      state: deliveryAddress?.state,
+      pinCode: deliveryAddress?.postal,
+    };
+
+    const data = await Order.create({
+      products,
+      userId,
+      amount: totalPrice,
+      shippingAddress,
+    });
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json(error);
@@ -35,11 +50,8 @@ async function deleteAllOrder(req, res) {
 async function getOrderByOrderId(req, res) {
   try {
     const { orderId } = req.params;
-    // console.log(orderId);
-    // return;
-    const data = await Order.findById(orderId).populate("items");
-    console.log(data);
-    res.status(200).json(data);
+    const order = await Order.findById(orderId).populate("products.productId");
+    res.status(200).json(order);
   } catch (error) {
     console.log(error);
   }

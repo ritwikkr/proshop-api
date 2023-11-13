@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-import nodemailer from "nodemailer";
 
 import User from "../model/userSchema.js";
 import sendPasswordResetEmail from "../middleware/sendMail.js";
