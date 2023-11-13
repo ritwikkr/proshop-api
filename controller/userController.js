@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-import nodemailer from "nodemailer";
 
 import User from "../model/userSchema.js";
 import sendPasswordResetEmail from "../middleware/sendMail.js";
@@ -142,6 +141,7 @@ async function forgotPassword(req, res) {
     const token = await isUserPresent.createJWT();
 
     const resetLink = `https://myproshop.netlify.app/reset-password?token=${token}`;
+    // const resetLink = `http://localhost:3000/reset-password?token=${token}`;
     const emailSent = await sendPasswordResetEmail(
       isUserPresent.email,
       resetLink
@@ -186,14 +186,14 @@ async function deleteAddress(req, res) {
 
 async function resetPassword(req, res) {
   try {
-    const { password } = req.body;
+    const { newPassword } = req.body;
     const user = await User.findById(req.user);
     if (!user) {
       return res.status(400).json("User not found");
     }
 
     // Update the password
-    user.password = password.newPassword;
+    user.password = newPassword;
     await user.save();
 
     res.status(200).json("Password reset successfully");
