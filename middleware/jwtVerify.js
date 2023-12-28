@@ -1,25 +1,14 @@
 import jwt from "jsonwebtoken";
 
-async function verifyJWT(req, res, next) {
+export default async (req, res, next) => {
   try {
-    const headers = req.headers;
-    if (!headers) throw new Error("Header not present in response");
-
-    const authorization = headers.authorization;
-    if (!authorization)
-      throw new Error("Authorization not present in response");
-
-    const token = authorization.split(" ")[1];
-
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
-    if (!userId) {
-      return;
-    }
-    req.user = userId;
+    const token = req.headers.authorization.split(" ")[1];
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    req.userData = { userId: decodedToken.userId };
     next();
   } catch (error) {
-    res.status(400).json("JSON WEB TOKEN Expired");
+    return res
+      .status(401)
+      .json({ error: "Authentication failed. Please try to login again " });
   }
-}
-
-export default verifyJWT;
+};
