@@ -85,8 +85,6 @@ async function ratingsAndReviews(req, res) {
     // Save the updated product with the new rating
     const updatedProduct = await product.save();
 
-    console.log(updatedProduct.ratingsAndReviews);
-
     // Calculate the updated total ratings and update it in the product document
     updatedProduct.ratingsAndReviews.totalRatings =
       updatedProduct.ratingsAndReviews.ratingAndReview.length;
