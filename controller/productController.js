@@ -104,15 +104,15 @@ async function ratingsAndReviews(req, res) {
 // DELETE: Delete Ratings and review
 async function deleteRatingAndReview(req, res) {
   try {
-    const { productID, ratingID } = req.body;
+    const { productID, userID } = req.body;
     const product = await Product.findById(productID);
 
     const { ratingsAndReviews } = product;
     const { ratingAndReview } = ratingsAndReviews;
 
-    // Filter out the object with the specified ratingID
+    // Filter out the object with the specified userID
     const updatedRatingAndReview = ratingAndReview.filter(
-      (review) => review._id.toString() !== ratingID
+      (review) => review.userId._id.toString() !== userID
     );
 
     // Update the ratingsAndReviews with the modified ratingAndReview array
@@ -121,9 +121,7 @@ async function deleteRatingAndReview(req, res) {
     // Save the changes to the product
     await product.save();
 
-    res
-      .status(200)
-      .json({ success: true, message: "Ratings deleted successfully" });
+    res.status(200).json(ratingsAndReviews);
   } catch (error) {
     res.status(400).json(error);
   }
