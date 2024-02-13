@@ -2,12 +2,13 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import Razorpay from "razorpay";
+import Stripe from "stripe";
 
 import connectDB from "./db/connectDB.js";
 import productRoute from "./router/productRoute.js";
 import userRoute from "./router/userRoutes.js";
 import orderRoute from "./router/orderRoute.js";
-import Stripe from "stripe";
+import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const app = express();
 
@@ -71,6 +72,9 @@ app.post("/api/v1/payment/razor", async (req, res) => {
 app.get("/api/v1/getNodeEnv", (req, res) => {
   return res.json({ msg: process.env.NODE_ENV });
 });
+
+app.use(notFound);
+app.use(errorHandler);
 
 function start() {
   const PORT = process.env.PORT || 5000;
