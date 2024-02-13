@@ -7,17 +7,18 @@ import asyncHandler from "../middleware/asyncHandler.js";
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(500).json({ error: "Please fill all details" });
+    res.status(404);
+    throw new Error("Please provide all details!");
   }
   const user = await User.findOne({ email });
   if (!user) {
-    return res
-      .status(500)
-      .json({ error: "User not registered!. Please register first" });
+    res.status(404);
+    throw new Error("User not registered!. Please register first");
   }
   const isPasswordCorrect = await user.comparePassword(password);
   if (!isPasswordCorrect) {
-    return res.status(500).json({ error: "Email or Password incorrect" });
+    res.status(404);
+    throw new Error("Email or Password incorrect");
   }
   const token = user.createJWT();
   user.password = undefined;
@@ -27,16 +28,17 @@ const login = asyncHandler(async (req, res) => {
 const signup = asyncHandler(async (req, res) => {
   const { name, email, password, confirmPassword } = req.body;
   if (!name || !email || !password) {
-    return res.status(500).json({ error: "Please fill all details" });
+    res.status(404);
+    throw new Error("Please provide all details!");
   }
   if (password !== confirmPassword) {
-    return res.status(500).json({ error: "Passwords do not match" });
+    res.status(404);
+    throw new Error("Passwords do not match");
   }
   const isEmailPresent = await User.findOne({ email });
   if (isEmailPresent) {
-    return res
-      .status(500)
-      .json({ error: "You are already registered. Please log in" });
+    res.status(404);
+    throw new Error("You are already registered. Please log in");
   }
   const user = await User.create({ name, email, password });
   const token = user.createJWT();
@@ -48,7 +50,8 @@ const addAddress = asyncHandler(async (req, res) => {
   const { userAddress, userId } = req.body;
   const isUserPresent = await User.findById(userId);
   if (!isUserPresent) {
-    return res.status(500).json({ error: "Email not present" });
+    res.status(404);
+    throw new Error("Email not present");
   }
 
   const user = await User.findByIdAndUpdate(
@@ -76,7 +79,8 @@ const updateUser = asyncHandler(async (req, res) => {
   let { name, email, password, id } = req.body;
   const data = await User.findById(id);
   if (!data) {
-    return res.status(500).json({ error: "Email not present" });
+    res.status(404);
+    throw new Error("Email not present");
   }
   const bodyToUpdate = { name, email };
   const user = await User.findByIdAndUpdate(id, bodyToUpdate, {
@@ -93,7 +97,8 @@ const updatePassword = asyncHandler(async (req, res) => {
     passwordDetails.currPassword
   );
   if (!isPasswordCorrect) {
-    return res.status(500).json({ message: "Old Password Incorrect" });
+    res.status(404);
+    throw new Error("Old Password Incorrect");
   }
   const salt = await bcrypt.genSalt(10);
   passwordDetails.newPassword = await bcrypt.hash(
@@ -116,7 +121,8 @@ const forgotPassword = asyncHandler(async (req, res) => {
   const { user } = req.body;
   const isUserPresent = await User.findOne({ email: user });
   if (!isUserPresent) {
-    return res.status(400).json("Email Not Present");
+    res.status(404);
+    throw new Error("Email Not Present");
   }
   const token = await isUserPresent.createJWT();
 
@@ -127,7 +133,8 @@ const forgotPassword = asyncHandler(async (req, res) => {
     resetLink
   );
   if (!emailSent) {
-    return res.status(400).json("Error");
+    res.status(404);
+    throw new Error("Error");
   }
   res.status(200).json("Email Sent Successfully");
 });
@@ -136,7 +143,8 @@ const deleteAddress = asyncHandler(async (req, res) => {
   const { userId, addressId } = req.query;
   const user = await User.findById(userId);
   if (!user) {
-    return res.status(400).json("User not present");
+    res.status(404);
+    throw new Error("User not present");
   }
 
   // Find the index of the address in the user's address array
@@ -161,7 +169,8 @@ const resetPassword = asyncHandler(async (req, res) => {
   const { newPassword } = req.body;
   const user = await User.findById(req.user);
   if (!user) {
-    return res.status(400).json("User not found");
+    res.status(404);
+    throw new Error("User not present");
   }
 
   // Update the password

@@ -9,6 +9,12 @@ const getProducts = asyncHandler(async (req, res) => {
   const skip = (page - 1) * pageSize;
 
   const products = await Product.find().skip(skip).limit(pageSize);
+
+  if (!products) {
+    res.status(404);
+    throw new Error("Product not found!!!");
+  }
+
   const totalCount = await Product.countDocuments();
 
   res.json({
@@ -31,9 +37,14 @@ const getSingleProduct = asyncHandler(async (req, res) => {
       },
     })
     .exec();
+  if (!data) {
+    res.status(404);
+    throw new Error("Product Not Found");
+  }
   res.status(200).json(data);
 });
 
+// ADMIN
 const addProduct = asyncHandler(async (req, res) => {
   const data = await Product.create(req.body);
   res.status(201).json(data);
@@ -42,6 +53,10 @@ const addProduct = asyncHandler(async (req, res) => {
 // GET: Featured Product
 const getFeaturedProduct = asyncHandler(async (req, res) => {
   const data = await Product.find({ featured: true });
+  if (!data) {
+    res.status(404);
+    throw new Error("Product Not Found");
+  }
   res.status(200).json(data);
 });
 
