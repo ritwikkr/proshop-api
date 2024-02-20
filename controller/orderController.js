@@ -37,8 +37,27 @@ const deleteAllOrder = asyncHandler(async (req, res) => {
 // GET: Order ID for Order Details page
 const getOrderByOrderId = asyncHandler(async (req, res) => {
   const { orderId } = req.params;
-  const order = await Order.findById(orderId).populate("products.productId");
-  res.status(200).json(order);
+  let order = await Order.findById(orderId).populate("products.productId");
+
+  let orderObject = order.toObject();
+
+  orderObject.products = orderObject.products.map((product) => {
+    const { productId } = product;
+    return {
+      _id: productId._id,
+      name: productId.name,
+      image: productId.image,
+      description: productId.description,
+      brand: productId.brand,
+      category: productId.category,
+      price: product.price,
+      countInStock: productId.countInStock,
+      featured: productId.featured,
+      ratingsAndReviews: productId.ratingsAndReviews,
+    };
+  });
+
+  res.status(200).json(orderObject);
 });
 
 export { createOrder, getOrder, deleteAllOrder, getOrderByOrderId };
