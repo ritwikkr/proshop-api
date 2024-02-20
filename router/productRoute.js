@@ -3,7 +3,6 @@ const router = express.Router();
 import {
   addProduct,
   deleteRatingAndReview,
-  getFeaturedProduct,
   getProducts,
   getSingleProduct,
   ratingsAndReviews,
@@ -11,7 +10,6 @@ import {
 import verifyJWT from "../middleware/jwtVerify.js";
 
 router.route("/getProducts").get(getProducts);
-router.route("/getFeaturedProduct").get(getFeaturedProduct);
 router.route("/getProduct/:id").get(getSingleProduct);
 router.route("/createProduct").post(addProduct);
 router

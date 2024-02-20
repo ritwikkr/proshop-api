@@ -50,16 +50,6 @@ const addProduct = asyncHandler(async (req, res) => {
   res.status(201).json(data);
 });
 
-// GET: Featured Product
-const getFeaturedProduct = asyncHandler(async (req, res) => {
-  const data = await Product.find({ featured: true });
-  if (!data) {
-    res.status(404);
-    throw new Error("Product Not Found");
-  }
-  res.status(200).json(data);
-});
-
 // POST: Give ratings
 const ratingsAndReviews = asyncHandler(async (req, res) => {
   const { rating: ratings, productId, review } = req.body;
@@ -123,7 +113,6 @@ export {
   getProducts,
   getSingleProduct,
   addProduct,
-  getFeaturedProduct,
   ratingsAndReviews,
   deleteRatingAndReview,
 };
