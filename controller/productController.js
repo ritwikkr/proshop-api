@@ -109,10 +109,20 @@ const deleteRatingAndReview = asyncHandler(async (req, res) => {
   res.status(200).json(ratingsAndReviews);
 });
 
+const getWishlistedProducts = asyncHandler(async (req, res) => {
+  const { wishlist } = await User.findById(req.userData.userId);
+  const promises = wishlist.map(async (item) => {
+    return await Product.findById(item);
+  });
+  const data = await Promise.all(promises);
+  res.status(200).json(data);
+});
+
 export {
   getProducts,
   getSingleProduct,
   addProduct,
   ratingsAndReviews,
   deleteRatingAndReview,
+  getWishlistedProducts,
 };

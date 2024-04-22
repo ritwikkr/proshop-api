@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 
 import User from "../model/userSchema.js";
+import Product from "../model/productSchema.js";
 import sendPasswordResetEmail from "../middleware/sendMail.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 
@@ -184,6 +185,28 @@ const checkJWTExpiry = asyncHandler(async (req, res) => {
   res.status(200).json(true);
 });
 
+const toggleWishlist = asyncHandler(async (req, res) => {
+  const { productId } = req.body;
+  const { userId } = req.userData;
+  const user = await User.findById(userId);
+  if (!user) {
+    res.status(404);
+    throw new Error("User not present");
+  }
+  const product = await Product.findById(productId);
+  if (!product) {
+    res.status(404);
+    throw new Error("Product not present");
+  }
+  if (user.wishlist.includes(productId)) {
+    user.wishlist = user.wishlist.filter((id) => id != productId);
+  } else {
+    user.wishlist.push(productId);
+  }
+  await user.save();
+  return res.status(200).json(user);
+});
+
 export {
   login,
   signup,
@@ -194,4 +217,5 @@ export {
   deleteAddress,
   resetPassword,
   checkJWTExpiry,
+  toggleWishlist,
 };

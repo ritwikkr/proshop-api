@@ -7,6 +7,7 @@ import {
   login,
   resetPassword,
   signup,
+  toggleWishlist,
   updatePassword,
   updateUser,
 } from "../controller/userController.js";
@@ -23,5 +24,6 @@ router.route("/updatePassword").put(updatePassword);
 router.route("/resetPassword").patch(verifyJWT, resetPassword);
 router.route("/forgotPassword").post(forgotPassword);
 router.route("/checkJWTExpiry").post(verifyJWT, checkJWTExpiry);
+router.route("/toggleWishlist").post(verifyJWT, toggleWishlist);
 
 export default router;
