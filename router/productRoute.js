@@ -5,6 +5,7 @@ import {
   deleteRatingAndReview,
   getProducts,
   getSingleProduct,
+  getWishlistedProducts,
   ratingsAndReviews,
 } from "../controller/productController.js";
 import verifyJWT from "../middleware/jwtVerify.js";
@@ -16,5 +17,6 @@ router
   .route("/reviews")
   .patch(verifyJWT, ratingsAndReviews)
   .delete(verifyJWT, deleteRatingAndReview);
+router.route("/getWishlistedProducts").get(verifyJWT, getWishlistedProducts);
 
 export default router;

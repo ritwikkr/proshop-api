@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema(
         country: { type: String },
       },
     ],
+    wishlist: [{ type: mongoose.Schema.Types.ObjectId }],
   },
   { timestamps: true }
 );
