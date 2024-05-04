@@ -8,6 +8,7 @@ import userRoute from "./router/userRoutes.js";
 import orderRoute from "./router/orderRoute.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import paymentRoute from "./router/paymentRourte.js";
+import wishlistRoute from "./router/wishlistRoute.js";
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use("/api/v1/product", productRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/order", orderRoute);
 app.use("/api/v1/payment", paymentRoute);
+app.use("/api/v1/wishlist", wishlistRoute);
 
 app.get("/api/v1/getNodeEnv", (req, res) => {
   return res.json({ msg: process.env.NODE_ENV });
