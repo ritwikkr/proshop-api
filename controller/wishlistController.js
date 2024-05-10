@@ -5,12 +5,14 @@ import Products from "../model/productSchema.js";
 export const getWishlistItems = async (req, res) => {
   try {
     const { userId } = req.userData;
-    const wishlistItems = await Wishlist.findOne({ user: userId });
-    const data = await Promise.all(
-      wishlistItems.products.map(async (item) => {
-        return await Products.findById(item);
-      })
-    );
+    const wishlistItems = await Wishlist.findOne({ userId });
+    let data = [];
+    if (wishlistItems)
+      data = await Promise.all(
+        wishlistItems.products.map(async (item) => {
+          return await Products.findById(item);
+        })
+      );
     res.json(data);
   } catch (error) {
     res
