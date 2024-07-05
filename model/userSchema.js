@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String },
     address: [
       {
         name: { type: String },
@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema(
       },
     ],
     wishlist: [{ type: mongoose.Schema.Types.ObjectId }],
+    googleId: { type: String, unique: true },
+    isVerified: { type: Boolean, default: false, required: true },
+    otp: { type: String },
   },
   { timestamps: true }
 );
@@ -30,6 +33,9 @@ userSchema.pre("save", async function () {
 });
 
 userSchema.methods.comparePassword = async function (password) {
+  if (!this.password) {
+    return "User not registered";
+  }
   return await bcrypt.compare(password, this.password);
 };
 

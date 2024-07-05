@@ -2,49 +2,171 @@ import bcrypt from "bcryptjs";
 
 import User from "../model/userSchema.js";
 import Product from "../model/productSchema.js";
-import sendPasswordResetEmail from "../middleware/sendMail.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import sendEmail from "../middleware/sendEmailViaNodeMailer.js";
+import generateOTP from "../helper/otpGeneration.js";
 
-const login = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    res.status(404);
-    throw new Error("Please provide all details!");
-  }
-  const user = await User.findOne({ email });
-  if (!user) {
-    res.status(404);
-    throw new Error("User not registered!. Please register first");
-  }
-  const isPasswordCorrect = await user.comparePassword(password);
-  if (!isPasswordCorrect) {
-    res.status(404);
-    throw new Error("Email or Password incorrect");
-  }
-  const token = user.createJWT();
-  user.password = undefined;
-  res.status(200).json({ user, token });
-});
+// RES -> {success: true/false, message: "sample message", data: optional(if available)}
 
-const signup = asyncHandler(async (req, res) => {
-  const { name, email, password, confirmPassword } = req.body;
-  if (!name || !email || !password) {
-    res.status(404);
-    throw new Error("Please provide all details!");
+async function signup(req, res) {
+  try {
+    const { name, email, password, confirmPassword } = req.body;
+
+    if (!name || !email || !password || !confirmPassword) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Please provide all details!" });
+    }
+
+    if (password !== confirmPassword) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Passwords do not match" });
+    }
+
+    const isEmailPresent = await User.findOne({ email });
+    if (isEmailPresent) {
+      if (isEmailPresent.googleId) {
+        return res.status(404).json({
+          success: false,
+          message: "You have already registered. Login via Google",
+        });
+      }
+      if (!isEmailPresent.isVerified) {
+        return res.status(404).json({
+          success: false,
+          message: "Go to your email and click on the link for verification",
+        });
+      }
+
+      return res.status(404).json({
+        success: false,
+        message: "You are already registered. Please log in",
+      });
+    }
+
+    // Generate OTP
+    const otp = generateOTP(6);
+    await User.create({ name, email, password, otp });
+
+    // Send otp in email
+    const emailSubject = "Email Verification";
+    const emailText = `Hi ${name},
+
+Welcome to ProShop!
+
+Please use the following OTP to verify your email address:
+
+OTP: ${otp}
+
+If you did not sign up for this account, please ignore this email or contact support.
+
+Thank you,
+The ProShop Team`;
+    const emailHtml = `<p>Hi ${name},</p>
+<p>Welcome to ProShop!</p>
+<p>Please use the following OTP to verify your email address:</p>
+<h2>${otp}</h2>
+<p>If you did not sign up for this account, please ignore this email or contact support.</p>
+<p>Thank you,<br>The ProShop Team</p>`;
+
+    const emailSent = await sendEmail(
+      email,
+      emailSubject,
+      emailText,
+      emailHtml
+    );
+    if (!emailSent) {
+      return res.status(404).json({
+        success: false,
+        message: "Email didn't sent. Something went wrong",
+      });
+    }
+
+    res
+      .status(201)
+      .json({ success: true, message: "Please verify OTP sent to your email" });
+  } catch (error) {
+    return res.status(404).json({ success: false, message: error });
   }
-  if (password !== confirmPassword) {
-    res.status(404);
-    throw new Error("Passwords do not match");
+}
+
+async function verifyOTP(req, res) {
+  try {
+    const { otp, email } = req.body;
+    if (!otp || !email)
+      return res
+        .status(404)
+        .json({ sucess: false, message: "Please provide all values" });
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not present" });
+    }
+
+    if (user.otp !== otp) {
+      return res
+        .status(404)
+        .json({ success: false, message: "OTP is invalid" });
+    }
+    const token = user.createJWT();
+    user.isVerified = true;
+    user.otp = null;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "User registeration successfull. Redirecting to homepage",
+      data: { token, user },
+    });
+  } catch (error) {
+    return res.status(404).json({ success: false, message: error });
   }
-  const isEmailPresent = await User.findOne({ email });
-  if (isEmailPresent) {
-    res.status(404);
-    throw new Error("You are already registered. Please log in");
+}
+
+async function login(req, res) {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password)
+      return res
+        .status(404)
+        .json({ success: false, message: "Please provide all details!" });
+
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(404).json({
+        success: false,
+        message: "User not registered!. Please register first",
+      });
+
+    const isPasswordCorrect = await user.comparePassword(password);
+
+    if (isPasswordCorrect === "User not registered") {
+      throw new Error("User not registerd. Sign in via google");
+    }
+    if (!isPasswordCorrect) {
+      res.status(404);
+      throw new Error("Email or Password incorrect");
+    }
+    const token = user.createJWT();
+    user.password = undefined;
+    res.status(200).json({ user, token });
+  } catch (error) {
+    return res.status(404).json({ success: false, message: error });
   }
-  const user = await User.create({ name, email, password });
+}
+
+const loginViaGoogle = asyncHandler(async (req, res) => {
+  // Extract user information from the req.user object
+  const user = req.user;
   const token = user.createJWT();
-  user.password = undefined;
-  res.status(201).json({ user, token });
+  const { id: googleId, name, email } = user;
+
+  // Redirect to the client with user information as query parameters
+  const redirectUrl = `http://localhost:3000/auth/google/callback?googleId=${googleId}&name=${name}&email=${email}&token=${token}`;
+  return res.redirect(redirectUrl);
 });
 
 const addAddress = asyncHandler(async (req, res) => {
@@ -119,20 +241,35 @@ const updatePassword = asyncHandler(async (req, res) => {
 });
 
 const forgotPassword = asyncHandler(async (req, res) => {
-  const { user } = req.body;
-  const isUserPresent = await User.findOne({ email: user });
+  const { email } = req.body;
+  const isUserPresent = await User.findOne({ email });
   if (!isUserPresent) {
-    res.status(404);
-    throw new Error("Email Not Present");
+    return res.status(404).json("Email not present. Please register");
   }
   const token = await isUserPresent.createJWT();
+  const resetLink =
+    process.env.NODE_ENV === "development"
+      ? `http://localhost:3000/reset-password?token=${token}`
+      : `https://shopease.site/reset-password?token=${token}`;
 
-  const resetLink = `https://myproshop.netlify.app/reset-password?token=${token}`;
-  // const resetLink = `http://localhost:3000/reset-password?token=${token}`;
-  const emailSent = await sendPasswordResetEmail(
-    isUserPresent.email,
-    resetLink
-  );
+  const emailSubject = "Recovery Email Password";
+  const emailText = `Hi ${isUserPresent.name},
+
+We received a request to reset your password. Click the link below to reset your password:
+
+${resetLink}
+
+If you did not request a password reset, please ignore this email or contact support.
+
+Thank you,
+The ProShop Team`;
+  const emailHtml = `<p>Hi ${isUserPresent.name},</p>
+  <p>We received a request to reset your password. Click the link below to reset your password:</p>
+  <p><a href="${resetLink}">Reset Password</a></p>
+  <p>If you did not request a password reset, please ignore this email or contact support.</p>
+  <p>Thank you,<br>The ProShop Team</p>`;
+
+  const emailSent = await sendEmail(email, emailSubject, emailText, emailHtml);
   if (!emailSent) {
     res.status(404);
     throw new Error("Error");
@@ -168,7 +305,8 @@ const deleteAddress = asyncHandler(async (req, res) => {
 
 const resetPassword = asyncHandler(async (req, res) => {
   const { newPassword } = req.body;
-  const user = await User.findById(req.user);
+  const { userId } = req.userData;
+  const user = await User.findById(userId);
   if (!user) {
     res.status(404);
     throw new Error("User not present");
@@ -218,4 +356,6 @@ export {
   resetPassword,
   checkJWTExpiry,
   toggleWishlist,
+  loginViaGoogle,
+  verifyOTP,
 };
